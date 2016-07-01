@@ -3,10 +3,9 @@ package project2;
 import java.util.Comparator;
 
 public class AvlTree<T extends Comparable<T>> extends BinarySearchTree<T> {
-
-    
+	 
     /* Function to get height of node */
-    public int height(BinaryNode<T> t )
+    private int height(BinaryNode<T> t )
     {
         return t == null ? -1 : t.height;
     }
@@ -17,7 +16,7 @@ public class AvlTree<T extends Comparable<T>> extends BinarySearchTree<T> {
         return lhs > rhs ? lhs : rhs;
     }
     
-   public BinaryNode<T> insert(T x, BinaryNode<T> t) {
+    public BinaryNode<T> insert(T x, BinaryNode<T> t) {
 		if (t == null)
 			return new BinaryNode<>(x, null, null);
 
