@@ -311,18 +311,48 @@ public class TreePrinter {
 	}
 
 	public static void main(String[] args) {
-//		BinarySearchTree<Integer> tree = new BinarySearchTree<>() ;
-		AvlNode<Integer> tree = new AvlNode<>(9);
+//		BinarySearchTree<Integer> tree = new BinarySearchTree<>();
+		AvlTree<Integer> tree = new AvlTree<>();
 		Random rand = new Random();
-	
-		while(tree.height() != 5) {
+//		
+//		long timeStart = System.currentTimeMillis();		
+//		while(tree.height() != 5) {
+//			int n = rand.nextInt(90) + 10;
+//			tree.insert(n);
+//			TreePrinter print = new TreePrinter(tree);
+//			print.print("TREE");
+//		}
+//		
+//		while(tree.getRoot() != null)
+//		{
+//			tree.remove(tree.getRoot().getData());
+//			TreePrinter print = new TreePrinter(tree);
+//			print.print("REMOVE");
+//		}
+//		
+//		long timeEnd = System.currentTimeMillis();
+//
+//         System.out.println("Time taken to make tree: "+ (double)(timeEnd-timeStart)/100 + " seconds");
+//		
+		for(int i = 0; i < 35; i++)
+		{
 			int n = rand.nextInt(90) + 10;
 			tree.insert(n);
+			TreePrinter print = new TreePrinter(tree);
+			print.print("tree");
 		}
-				
-		System.out.println(tree.getRoot());
-		TreePrinter print = new TreePrinter(tree);
-		print.print("TREE");
 		
+		while(tree.getRoot() != null)
+		{
+			tree.remove(tree.getRoot().getData());
+			TreePrinter print = new TreePrinter(tree);
+			print.print("REMOVE");
+			
+		}
+		
+		
+	
 	}
-}
+	}
+	
+	
