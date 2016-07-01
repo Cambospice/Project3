@@ -106,7 +106,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		return t;
 	}
 
-	private BinaryNode<T> remove(T x, BinaryNode<T> t) {
+	public BinaryNode<T> remove(T x, BinaryNode<T> t) {
 		if (t == null)
 			return t;
 
