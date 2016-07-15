@@ -3,6 +3,8 @@ package project3;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.soap.Node;
+
 /**
  * TODO Replace this comment with your own.
  * 
@@ -14,8 +16,8 @@ import java.util.List;
 public class HashTable implements DataCounter<String> {
 	private static final int DEFAULT_TABLE_SIZE = 101;
 
-	private List<String>[] theLists;
-	private int size;
+	private List<String>[] chain;
+	private int currentSize;
 
 	/**
 	 * construct the hash table
@@ -25,90 +27,107 @@ public class HashTable implements DataCounter<String> {
 	}
 
 	public HashTable(int size) {
-		theLists = new LinkedList[nextPrime(size)];
-		for (int i = 0; i < theLists.length; i++)
-			theLists[i] = new LinkedList<>();
+		chain = new List[size];
+		currentSize = 0;
+
+	}
+
+	public class List<T> {
+		private String element;
+		private List next;
+		private double freq;
+
+		public List() {
+			freq = 1;
+		}
+
+		public List(String element, List next) {
+			this.element = element;
+			this.freq = 1;
+			this.next = next;
+		}
+
 	}
 
 	/**
 	 * grow the hash table
 	 */
-	private void rehash() {
-		List<String>[] oldLists = theLists;
-
-		theLists = new List[nextPrime(2 * theLists.length)];
-		for (int j = 0; j < theLists.length; j++)
-			theLists[j] = new LinkedList<>();
-
-		size = 0;
-		for (int i = 0; i < oldLists.length; i++)
-			for (String item : oldLists[i])
-				insert(item);
-	}
-
-	private int myhash(String x) {
-		int hashVal = x.hashCode();
-
-		hashVal %= theLists.length;
-		if (hashVal < 0)
-			hashVal += theLists.length;
-
-		return hashVal;
-	}
-
-	public boolean contains(String x) {
-		List<String> whichList = theLists[myhash(x)];
-		return whichList.contains(x);
-	}
-
-	public void insert(String x) {
-		List<String> whichList = theLists[myhash(x)];
-		if (!whichList.contains(x)) {
-			whichList.add(x);
-			if (++size > theLists.length)
-				rehash();
+	public void rehash() {
+		List[] list = new List[chain.length * 2];
+		for (List node : chain) {
+			for (; node != null; node = node.next) {
+				insert(node.element, node.freq);
+			}
 		}
+		chain = list;
+
 	}
 
-	/**
-	 * Internal method to find a prime number at least as large as n.
-	 * 
-	 * @param n
-	 *            the starting number (must be positive).
-	 * @return a prime number larger than or equal to n.
-	 */
-	private static int nextPrime(int n) {
-		if (n <= 0)
-			n = 3;
+	// String hash function from online
+	public int myhash(String s) {
+		int intLength = s.length() / 4;
+		long sum = 0;
+		for (int j = 0; j < intLength; j++) {
+			char c[] = s.substring(j * 4, (j * 4) + 4).toCharArray();
+			long mult = 1;
+			for (int k = 0; k < c.length; k++) {
+				sum += c[k] * mult;
+				mult *= 256;
+			}
+		}
 
-		if (n % 2 == 0)
-			n++;
+		char c[] = s.substring(intLength * 4).toCharArray();
+		long mult = 1;
+		for (int k = 0; k < c.length; k++) {
+			sum += c[k] * mult;
+			mult *= 256;
+		}
 
-		for (; !isPrime(n); n += 2)
-			;
+		return (int) (Math.abs(sum) % chain.length);
 
-		return n;
 	}
 
-	/**
-	 * Internal method to test if a number is prime. Not an efficient algorithm.
-	 * 
-	 * @param n
-	 *            the number to test.
-	 * @return the result of the test.
-	 */
-	private static boolean isPrime(int n) {
-		if (n == 2 || n == 3)
-			return true;
+	public boolean contain(String x) {
+		List<String> whichList = chain[myhash(x)];
+		boolean isContain = false;
+		if (whichList == null) {
+			chain[myhash(x)] = new List<>();
+			isContain = true;
+		} else {
+			System.out.println(whichList.element);
+			while (whichList != null && !whichList.element.equals(x)) {
+				whichList = whichList.next;
+			}
 
-		if (n == 1 || n % 2 == 0)
-			return false;
+			if (whichList == null) {
+				chain[myhash(x)] = new List(x, chain[myhash(x)]);
+				isContain = true;
+			} else {
+				whichList.freq++;
+				isContain = false;
+			}
+		}
+		return isContain;
+	}
 
-		for (int i = 3; i * i <= n; i += 2)
-			if (n % i == 0)
-				return false;
+	public void insert(String x, double count) {
+		List<String> whichList = chain[myhash(x)];
+		if (whichList == null) {
+			chain[myhash(x)] = new List<>();
+			chain[myhash(x)].freq = count;
+		} else {
+			while (whichList != null && !whichList.element.equals(x)) {
+				whichList = whichList.next;
+			}
 
-		return true;
+			if (whichList == null) {
+				chain[myhash(x)] = new List(x, chain[myhash(x)]);
+
+			} else {
+				whichList.freq++;
+
+			}
+		}
 	}
 
 	/**
@@ -121,6 +140,15 @@ public class HashTable implements DataCounter<String> {
 	 */
 	public DataCount<String>[] getCounts() {
 
+		DataCount<String>[] dataCounts = new DataCount[currentSize];
+		int i = 0;
+		for (List theList : chain) {
+			for (; theList != null; theList = theList.next) {
+				dataCounts[i++] = new DataCount(theList.element,
+						(int) theList.freq);
+			}
+		}
+		return dataCounts;
 	}
 
 	/**
@@ -130,7 +158,12 @@ public class HashTable implements DataCounter<String> {
 	 */
 	public int getSize() {
 
-		return size;
+		return currentSize;
+	}
+
+	public double loadFactor() {
+		double lf = currentSize / chain.length;
+		return lf;
 	}
 
 	/**
@@ -140,6 +173,10 @@ public class HashTable implements DataCounter<String> {
 	 *            data element whose count to increment.
 	 */
 	public void incCount(String data) {
-
+		if (contain(data))
+			currentSize++;
+		if (loadFactor() > 1)
+			rehash();
 	}
+
 }
